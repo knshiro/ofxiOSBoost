@@ -65,7 +65,7 @@ case $CURRENTPATH in
           ;;
 esac
 
-: ${BOOST_LIBS:="random regex graph random chrono thread signals filesystem system date_time"}
+: ${BOOST_LIBS:="serialization program_options random regex graph random chrono thread signals filesystem system date_time"}
 : ${IPHONE_SDKVERSION:=`xcodebuild -showsdks | grep iphoneos | egrep "[[:digit:]]+\.[[:digit:]]+" -o | tail -1`}
 : ${EXTRA_CPPFLAGS:="-fPIC -DBOOST_SP_USE_SPINLOCK -std=$CPPSTD -stdlib=$STDLIB -miphoneos-version-min=$IOS_MIN_VERSION $BITCODE -fvisibility=hidden -fvisibility-inlines-hidden"}
 
@@ -180,6 +180,7 @@ unpackBoost()
 
     [ -d $SRCDIR ]    || mkdir -p $SRCDIR
     [ -d $BOOST_SRC ] || ( cd $SRCDIR; tar xfj $BOOST_TARBALL )
+
     [ -d $BOOST_SRC ] && echo "    ...unpacked as $BOOST_SRC"
 
     # Fix linker issue with utf8_codecvt_facet.cpp
@@ -271,8 +272,8 @@ buildBoostForIPhoneOS()
 
     # Install this one so we can copy the includes for the frameworks...
 
-    
-    set +e    
+
+    set +e
     echo "------------------"
     LOG="$LOGDIR/build-iphone-stage.log"
     echo "Running bjam for iphone-build stage"
@@ -280,11 +281,11 @@ buildBoostForIPhoneOS()
     echo " ${LOG}"
     echo "Please stand by..."
     ./bjam -j${PARALLEL_MAKE} --build-dir=iphone-build -sBOOST_BUILD_USER_CONFIG=$BOOST_SRC/tools/build/example/user-config.jam --stagedir=iphone-build/stage --prefix=$PREFIXDIR --toolset=darwin-${IPHONE_SDKVERSION}~iphone cxxflags="-miphoneos-version-min=$IOS_MIN_VERSION -stdlib=$STDLIB $BITCODE" variant=release linkflags="-stdlib=$STDLIB" architecture=arm target-os=iphone macosx-version=iphone-${IPHONE_SDKVERSION} define=_LITTLE_ENDIAN link=static stage > "${LOG}" 2>&1
-    if [ $? != 0 ]; then 
+    if [ $? != 0 ]; then
         tail -n 100 "${LOG}"
         echo "Problem while Building iphone-build stage - Please check ${LOG}"
         exit 1
-    else 
+    else
         echo "iphone-build stage successful"
     fi
 
@@ -295,11 +296,11 @@ buildBoostForIPhoneOS()
     echo " ${LOG}"
     echo "Please stand by..."
     ./bjam -j${PARALLEL_MAKE} --build-dir=iphone-build -sBOOST_BUILD_USER_CONFIG=$BOOST_SRC/tools/build/example/user-config.jam --stagedir=iphone-build/stage --prefix=$PREFIXDIR --toolset=darwin-${IPHONE_SDKVERSION}~iphone cxxflags="-miphoneos-version-min=$IOS_MIN_VERSION -stdlib=$STDLIB $BITCODE" variant=release linkflags="-stdlib=$STDLIB" architecture=arm target-os=iphone macosx-version=iphone-${IPHONE_SDKVERSION} define=_LITTLE_ENDIAN link=static install > "${LOG}" 2>&1
-    if [ $? != 0 ]; then 
+    if [ $? != 0 ]; then
         tail -n 100 "${LOG}"
         echo "Problem while Building iphone-build install - Please check ${LOG}"
         exit 1
-    else 
+    else
         echo "iphone-build install successful"
     fi
     doneSection
@@ -311,11 +312,11 @@ buildBoostForIPhoneOS()
     echo " ${LOG}"
     echo "Please stand by..."
     ./bjam -j${PARALLEL_MAKE} --build-dir=iphonesim-build -sBOOST_BUILD_USER_CONFIG=$BOOST_SRC/tools/build/example/user-config.jam --stagedir=iphonesim-build/stage --toolset=darwin-${IPHONE_SDKVERSION}~iphonesim architecture=x86 target-os=iphone variant=release cxxflags="-miphoneos-version-min=$IOS_MIN_VERSION -stdlib=$STDLIB $BITCODE" macosx-version=iphonesim-${IPHONE_SDKVERSION} link=static stage > "${LOG}" 2>&1
-    if [ $? != 0 ]; then 
+    if [ $? != 0 ]; then
         tail -n 100 "${LOG}"
         echo "Problem while Building iphone-simulator build - Please check ${LOG}"
         exit 1
-    else 
+    else
         echo "iphone-simulator build successful"
     fi
 
@@ -363,7 +364,7 @@ scrunchAllLibsTogetherInOneLibPerPlatform()
     echo "Linking each architecture into an uberlib ($ALL_LIBS => libboost.a )"
 
     rm $IOSBUILDDIR/*/libboost.a
-    
+
     echo ...armv7
     (cd $IOSBUILDDIR/armv7; $ARM_DEV_CMD ar crus libboost.a obj/*.o; )
     #echo ...armv7s
@@ -390,7 +391,7 @@ scrunchAllLibsTogetherInOneLibPerPlatform()
 #===============================================================================
 buildIncludes()
 {
-    
+
     mkdir -p $IOSINCLUDEDIR
     echo "------------------"
     echo "Copying Includes to Final Dir $OUTPUT_DIR_SRC"
@@ -398,11 +399,11 @@ buildIncludes()
     set +e
 
     cp -r $PREFIXDIR/include/boost/*  $OUTPUT_DIR_SRC/ > "${LOG}" 2>&1
-    if [ $? != 0 ]; then 
+    if [ $? != 0 ]; then
         tail -n 100 "${LOG}"
         echo "Problem while copying includes - Please check ${LOG}"
         exit 1
-    else 
+    else
         echo "Copy of Includes successful"
     fi
     echo "------------------"
@@ -429,7 +430,7 @@ echo "XCODE_ROOT:        $XCODE_ROOT"
 echo "COMPILER:          $COMPILER"
 if [ -z ${BITCODE} ]; then
     echo "BITCODE EMBEDDED: NO $BITCODE"
-else 
+else
     echo "BITCODE EMBEDDED: YES with: $BITCODE"
 fi
 
